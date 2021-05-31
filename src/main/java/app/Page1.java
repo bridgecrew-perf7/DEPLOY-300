@@ -4,7 +4,8 @@ import java.util.ArrayList;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-
+import java.text.NumberFormat;
+import java.text.DecimalFormat;
 /**
  * Temporary HTML as an example page.
  * 
@@ -23,46 +24,72 @@ public class Page1 implements Handler {
 
     @Override
     public void handle(Context context) throws Exception {
-        // Create a simple HTML webpage in a String
-        String html = "<html>";
-
-        // Add some Header information
-        html = html + "<head>" + 
-               "<title>Movies</title>";
-
-        // Add some CSS (external file)
-        html = html + "<link rel='stylesheet' type='text/css' href='common.css' />";
-
-        // Add the body
-        html = html + "<body>";
-
-        // Add HTML for link back to the homepage
-        html = html + "<h1>Page 1</h1>";
-        html = html + "<p>Return to Homepage: ";
-        html = html + "<a href='/'>Link to Homepage</a>";
-        html = html + "</p>";
-
-        // Look up some information from JDBC
-        // First we need to use your JDBCConnection class
+        NumberFormat myFormat = NumberFormat.getInstance();
+        NumberFormat formatter = new DecimalFormat("#0.00"); 
+        myFormat.setGroupingUsed(true);
         JDBCConnection jdbc = new JDBCConnection();
-
-        // Next we will ask this *class* for the movies
-        ArrayList<String> movies = jdbc.getMovies();
-
-        // Add HTML for the movies list
-        html = html + "<h1>Movies</h1>" + "<ul>";
-
-        // Finally we can print out all of the movies
-        for (String movie : movies) {
-            html = html + "<li>" + movie + "</li>";
-        }
-
-        // Finish the List HTML
-        html = html + "</ul>";
-
-        // Finish the HTML webpage
-        html = html + "</body>" + "</html>";
-
+        int sumCases = jdbc.getTotalCases();
+        int sumDeaths = jdbc.getTotalDeaths();
+        int sumRecov = jdbc.getTotalRecoveries();
+        int sumCasesUS = jdbc.getTotalCasesByCountry("US");
+        int sumCasesIndia = jdbc.getTotalCasesByCountry("India");
+        int sumCasesBrazil = jdbc.getTotalCasesByCountry("Brazil");
+        String html = "<!DOCTYPE html>";
+        html = html + "<html>";
+        html = html + "<head>";
+        html = html + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" charset=\"UTF-8\">";
+        html = html + "<link rel = \"stylesheet\" href = \"stylesheet.css\">";
+        html = html + "<link href=\"hover-min.css\" rel=\"stylesheet\">";
+        html = html + "<link href=\"https://fonts.googleapis.com/css2?family=IBM+Plex+Sans&display=swap\" rel=\"stylesheet\">";
+        html = html + "</head>";
+        html = html + "<body>";
+        html = html + "<div class=\"topnav\">";
+        html = html + "<a href = \"/\"><img src=\"icon.png\" style = \"width: 10vh;\"></a>";
+        html = html + " <a  href=\"/\" class=\"hvr-underline-from-center\" >Home</a>";
+        html = html + "<a href = \"page1.html\" class = \"hvr-underline-from-center active\">World Stats</a>";
+        html = html + " <a href=\"level2.html\" class=\"hvr-underline-from-center\">Map</a>";
+        html = html + "<a href=\"#about\" class=\"hvr-underline-from-center\">Detailed Reports</a>";
+        html = html + "</div> ";
+        html = html + "<div class=\"flexbox-container\">";
+        html = html + "<div class=\"total\">";
+        html = html + " Total cases worldwide<br>";
+        html = html + myFormat.format(sumCases);
+        html = html + " </div>";
+        html = html + "</div>";
+        html = html + "<div class=\"scroll-left\">";
+        html = html + " <p>Leading countries in COVID-19 cases: 1.USA " + myFormat.format(sumCasesUS) +"  &nbsp;&nbsp;  2.India " + myFormat.format(sumCasesIndia) + "&nbsp;&nbsp;  3.Brazil " + myFormat.format(sumCasesBrazil);
+        html = html + "  </p>";
+        html = html + "</div>";
+        html = html + " <div class=\"flexbox-container2\">";
+        html = html + "<div class = \"active\">";
+        html = html + " Active Cases <br><br><br>";
+        html = html + " <div class = \"number\">" +  myFormat.format(sumCases - (sumDeaths + sumRecov)) + "</div>";
+        html = html + " <div class=\"percentage\">";
+        html = html + "(" + formatter.format(((sumCases - (sumDeaths + sumRecov)) * 100.0) / sumCases) + "%)";
+        html = html + " </div>";
+        html = html + " </div>";
+        html = html + "<div class = \"vl\"></div>";
+        html = html + "<div class = \"death\">";
+        html = html + "Deaths <br><br><br>";
+        html = html + " <div class = \"number \">" + myFormat.format(sumDeaths)+"</div>";
+        html = html + " <div class=\"percentage\">(" + formatter.format(sumDeaths * 100.0 / sumCases)+"%)</div>";
+        html = html + " </div>";
+        html = html + " <div class=\"vl\"></div>";
+        html = html + " <div class = \"recoveries\">";
+        html = html + " Recoveries <br><br><br>";
+        html = html + " <div class = \"number\">" + myFormat.format(sumRecov) +"</div>";
+        html = html + "<div class=\"percentage\">(" + formatter.format(sumRecov * 100.0 / sumCases)+"%)</div>";
+        html = html + " </div>";
+        html = html + "</div>";
+        
+        
+        
+        
+        html = html +"<script src=\"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.3.0/chart.min.js\" integrity=\"sha512-yadYcDSJyQExcKhjKSQOkBKy2BLDoW6WnnGXCAkCoRlpHGpYuVuBqGObf3g/TdB86sSbss1AOP4YlGSb6EKQPg==\" crossorigin=\"anonymous\" referrerpolicy=\"no-referrer\"></script>";
+        
+        html = html +"</body>";
+        html = html +"</html>";
+        
 
         // DO NOT MODIFY THIS
         // Makes Javalin render the webpage
